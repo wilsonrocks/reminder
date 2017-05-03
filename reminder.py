@@ -1,5 +1,6 @@
 import argparse,datetime
 one_day = datetime.timedelta(days=1)
+format = "%a %d %b"
 import peewee
 
 dbfile = "reminder.db"
@@ -22,6 +23,19 @@ class Contact(ReminderModel):
 class Bank_Holiday(ReminderModel):
     date = peewee.DateField()
 
+def age(target):
+    return (next_anniversary(target).year - target.year)
+
+def next_anniversary(target):
+    this_year = datetime.date.today().year
+    date_this_year = datetime.date(this_year,target.month,target.day)
+
+    if date_this_year > datetime.date.today():
+        answer = date_this_year
+    else:
+        answer = datetime.date(this_year+1,target.month,target.day)
+    return answer
+
 def is_posting_day(target):
     answer = True
 
@@ -36,16 +50,10 @@ def is_posting_day(target):
     return(answer)
 
 def days_until(target):
-    this_year = datetime.date.today().year
-    date_this_year = datetime.date(this_year,target.month,target.day)
-    date_next_year = datetime.date(this_year+1,target.month,target.day)
 
-    delta = date_this_year - datetime.date.today()
+    delta = next_anniversary(target) - datetime.date.today()
 
-    if delta < datetime.timedelta(seconds=0):
-        delta = date_next_year - datetime.date.today()
-
-    return delta
+    return delta.days
 
 def last_posting_day(target):
     delivery_day = target
@@ -56,8 +64,16 @@ def last_posting_day(target):
     posting_day = delivery_day - one_day
     return posting_day
 
-
+def format_message(target):
+    return "{} has a birthday on {}, this is in {} days. The last posting day is {}. They will be {}".format(
+        occasion.name,
+        occasion.date.strftime(format),
+        days_until(occasion.date),
+        last_posting_day(occasion.date).strftime(format),
+        age(occasion.date)
+        )
 
 db.create_tables([Anniversary,Contact,Bank_Holiday],safe=True)
 
-print(last_posting_day(datetime.date(2017,12,26)))
+for occasion in Anniversary.select():
+    print(format_message(occasion))
