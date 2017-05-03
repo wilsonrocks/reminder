@@ -1,5 +1,5 @@
 import argparse,datetime
-
+one_day = datetime.timedelta(days=1)
 import peewee
 
 dbfile = "reminder.db"
@@ -47,6 +47,17 @@ def days_until(target):
 
     return delta
 
+def last_posting_day(target):
+    delivery_day = target
+
+    while is_posting_day(delivery_day) == False:
+        delivery_day -= one_day
+
+    posting_day = delivery_day - one_day
+    return posting_day
+
+
 
 db.create_tables([Anniversary,Contact,Bank_Holiday],safe=True)
 
+print(last_posting_day(datetime.date(2017,12,26)))
