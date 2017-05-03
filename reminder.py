@@ -19,6 +19,22 @@ class Contact(ReminderModel):
     email = peewee.CharField()
     phone = peewee.CharField()
 
+class Bank_Holiday(ReminderModel):
+    date = peewee.DateField()
+
+def is_posting_day(target):
+    answer = True
+
+    if target.isoweekday() in [6,7]: #ignore weekends
+        answer = False
+
+    bank_holidays = Bank_Holiday.select()
+
+    for hol in bank_holidays:
+        if (target.month,target.day) == (hol.date.month,hol.date.day): #ignore bank holidays
+            answer = False
+    return(answer)
+
 def days_until(target):
     this_year = datetime.date.today().year
     date_this_year = datetime.date(this_year,target.month,target.day)
@@ -32,7 +48,5 @@ def days_until(target):
     return delta
 
 
-db.create_tables([Anniversary,Contact],safe=True)
+db.create_tables([Anniversary,Contact,Bank_Holiday],safe=True)
 
-e = Anniversary.get(Anniversary.name=="Leah Bullas").date
-print(days_until(e).days)
