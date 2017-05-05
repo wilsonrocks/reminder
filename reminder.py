@@ -72,7 +72,7 @@ def last_posting_day(target):
     return posting_day
 
 def format_message(target):
-    return "{} has a birthday on {}, this is in {} days. The last posting day is {}. They will be {}".format(
+    return "Wilsons!!\n\n{} has a birthday on {}, this is in {} days.\nThe last posting day is {}.\nThey will be {}.".format(
         occasion.name,
         occasion.date.strftime(format),
         days_until(occasion.date),
@@ -80,22 +80,26 @@ def format_message(target):
         age(occasion.date)
         )
 
+
+def send_message(occasion):
+    contacts = [contact.email for contact in Contact.select()]
+
+    message = email.message.EmailMessage()
+    message['To'] = contacts
+    message['From'] = secrets.FROM_ADDR
+    message['Subject'] = "{}'s Birthday in {} days!".format(occasion.name,days_until(occasion.date))
+    message.set_content(format_message(occasion))
+    return(message)
+
+
+
+
 db.create_tables([Anniversary,Contact,Bank_Holiday],safe=True)
 
-for occasion in Anniversary.select():
-    print(format_message(occasion))
-
-
-test = email.message.EmailMessage()
-test['To'] = "oh.that.wilson@googlemail.com"
-test['From'] = secrets.FROM_ADDR
-test.set_content("Hi\nWhat's Up\nHow are you?\nThis is from Python\n\nlove James XXX")
-
-
-print(test)
 
 server = smtplib.SMTP_SSL('smtp.gmail.com',465)
-server.ehlo()
 server.login(secrets.FROM_ADDR,secrets.PASSWORD)
 
-server.sendmail(secrets.FROM_ADDR, test['To'], test.as_string())
+for occasion in Anniversary.select():
+    message = send_message(occasion)
+    server.sendmail(secrets.FROM_ADDR, message['To'], message.as_string())
