@@ -1,7 +1,14 @@
-import argparse,datetime
+import argparse
+import datetime
+import smtplib
+import email.message
+
 one_day = datetime.timedelta(days=1)
 format = "%a %d %b"
+
 import peewee
+
+import secrets
 
 dbfile = "reminder.db"
 db = peewee.SqliteDatabase(dbfile)
@@ -77,3 +84,18 @@ db.create_tables([Anniversary,Contact,Bank_Holiday],safe=True)
 
 for occasion in Anniversary.select():
     print(format_message(occasion))
+
+
+test = email.message.EmailMessage()
+test['To'] = "oh.that.wilson@googlemail.com"
+test['From'] = secrets.FROM_ADDR
+test.set_content("Hi\nWhat's Up\nHow are you?\nThis is from Python\n\nlove James XXX")
+
+
+print(test)
+
+server = smtplib.SMTP_SSL('smtp.gmail.com',465)
+server.ehlo()
+server.login(secrets.FROM_ADDR,secrets.PASSWORD)
+
+server.sendmail(secrets.FROM_ADDR, test['To'], test.as_string())
