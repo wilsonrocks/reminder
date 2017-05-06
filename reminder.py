@@ -16,6 +16,7 @@ days_to_send = [2,7,21]
 format = "%a %d %b"
 
 import peewee
+import requests
 
 import secrets
 
@@ -110,9 +111,19 @@ server = smtplib.SMTP_SSL('smtp.gmail.com',465)
 server.login(secrets.FROM_ADDR,secrets.PASSWORD)
 
 for occasion in Anniversary.select():
-    logger.debug("{} is in {} days.".format(occasion.name,days_until(occasion.date)))
     if days_until(occasion.date) in days_to_send:
         message = send_message(occasion)
+        
         #server.sendmail(secrets.FROM_ADDR, message['To'], message.as_string())
         logger.info("Sending email:\n{}".format(message.as_string()))
+
+
+        params = {"sender":"Wilsons",
+                "message":format_message(occasion),
+                "username":secrets.SMS_LOGIN,
+                "hash":secrets.HASH,
+                "test":"true",
+                "numbers":[contact.phone for contact in Contact.select()]}
+        r = requests.post("https://api.txtlocal.com/send",data=params)
+        logger.debug(r)
 
