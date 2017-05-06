@@ -1,9 +1,18 @@
-import argparse
+import logging
+logging.basicConfig(filename='reminder.log',level=logging.DEBUG,format='%(asctime)s %(levelname)s %(name)s %(message)s')
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+
+
 import datetime
 import smtplib
 import email.message
 
+
+logger.info("Running script on {}".format(datetime.datetime.now()))
+
 one_day = datetime.timedelta(days=1)
+days_to_send = [2,7,21]
 format = "%a %d %b"
 
 import peewee
@@ -101,5 +110,9 @@ server = smtplib.SMTP_SSL('smtp.gmail.com',465)
 server.login(secrets.FROM_ADDR,secrets.PASSWORD)
 
 for occasion in Anniversary.select():
-    message = send_message(occasion)
-    server.sendmail(secrets.FROM_ADDR, message['To'], message.as_string())
+    logger.debug("{} is in {} days.".format(occasion.name,days_until(occasion.date)))
+    if days_until(occasion.date) in days_to_send:
+        message = send_message(occasion)
+        #server.sendmail(secrets.FROM_ADDR, message['To'], message.as_string())
+        logger.info("Sending email:\n{}".format(message.as_string()))
+
