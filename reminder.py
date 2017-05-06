@@ -101,6 +101,18 @@ def send_message(occasion):
     message.set_content(format_message(occasion))
     return(message)
 
+def send_SMS(occasion):
+
+    params = {
+            "sender" : "Wilsons!",
+            "message" : format_message(occasion),
+            "username" : secrets.SMS_LOGIN,
+            "hash" : secrets.HASH,
+            "numbers" : ",".join([contact.phone for contact in Contact.select()])
+            }
+    logger.debug(params)
+    return requests.post("https://api.txtlocal.com/send/",data=params)
+
 
 
 
@@ -114,16 +126,10 @@ for occasion in Anniversary.select():
     if days_until(occasion.date) in days_to_send:
         message = send_message(occasion)
         
-        #server.sendmail(secrets.FROM_ADDR, message['To'], message.as_string())
+        server.sendmail(secrets.FROM_ADDR, message['To'], message.as_string())
+
         logger.info("Sending email:\n{}".format(message.as_string()))
 
-
-        params = {"sender":"Wilsons",
-                "message":format_message(occasion),
-                "username":secrets.SMS_LOGIN,
-                "hash":secrets.HASH,
-                "test":"true",
-                "numbers":[contact.phone for contact in Contact.select()]}
-        r = requests.post("https://api.txtlocal.com/send",data=params)
-        logger.debug(r)
+        response = send_SMS(occasion)
+        
 
