@@ -125,8 +125,9 @@ server.login(secrets.FROM_ADDR,secrets.PASSWORD)
 for occasion in Anniversary.select():
     if days_until(occasion.date) in days_to_send:
         message = send_message(occasion)
-        
-        server.sendmail(secrets.FROM_ADDR, message['To'], message.as_string())
+        contacts = [contact.email for contact in Contact.select()]
+
+        server.sendmail(secrets.FROM_ADDR, ",".join(contacts), message.as_string())
 
         logger.info("Sending email:\n{}".format(message.as_string()))
 
