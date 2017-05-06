@@ -124,6 +124,7 @@ server.login(secrets.FROM_ADDR,secrets.PASSWORD)
 
 for occasion in Anniversary.select():
     if days_until(occasion.date) in days_to_send:
+        logger.debug("Sending reminder for {}".format(occasion.name))
         message = send_message(occasion)
         contacts = [contact.email for contact in Contact.select()]
 
@@ -132,5 +133,6 @@ for occasion in Anniversary.select():
         logger.info("Sending email:\n{}".format(message.as_string()))
 
         response = send_SMS(occasion)
-        
+    else:
+        logger.debug("Not sending reminder for {}".format(occasion.name))
 
