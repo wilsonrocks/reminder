@@ -1,5 +1,5 @@
 import logging
-logging.basicConfig(filename='reminder.log',level=logging.DEBUG,format='%(asctime)s %(levelname)s %(name)s %(message)s')
+logging.basicConfig(filename='/home/dad/reminder/reminder.log',level=logging.DEBUG,format='%(asctime)s %(levelname)s %(name)s %(message)s')
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 
@@ -20,7 +20,7 @@ import requests
 
 import secrets
 
-dbfile = "reminder.db"
+dbfile = "/home/dad/reminder/reminder.db"
 db = peewee.SqliteDatabase(dbfile)
 
 class ReminderModel(peewee.Model):
@@ -110,7 +110,7 @@ def send_SMS(occasion):
             "hash" : secrets.HASH,
             "numbers" : ",".join([contact.phone for contact in Contact.select()])
             }
-    logger.debug(params)
+    logger.info("sending SMS to {}".format(params["numbers"]))
     return requests.post("https://api.txtlocal.com/send/",data=params)
 
 
@@ -124,7 +124,7 @@ server.login(secrets.FROM_ADDR,secrets.PASSWORD)
 
 for occasion in Anniversary.select():
     if days_until(occasion.date) in days_to_send:
-        logger.debug("Sending reminder for {}".format(occasion.name))
+        logger.info("Sending reminder for {}".format(occasion.name))
         message = send_message(occasion)
         contacts = [contact.email for contact in Contact.select()]
 
