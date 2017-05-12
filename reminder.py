@@ -1,5 +1,5 @@
 import logging
-logging.basicConfig(filename='/home/dad/reminder/reminder.log',level=logging.DEBUG,format='%(asctime)s %(levelname)s %(name)s %(message)s')
+logging.basicConfig(filename='/home/dad/reminder/reminder.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s %(message)s')
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
 
