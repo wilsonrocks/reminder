@@ -31,9 +31,6 @@ class Anniversary(ReminderModel):
     name = peewee.CharField()
     date = peewee.DateField()
 
-    def date_this_year(self):
-        return datetime.date(datetime.date.today().year, self.date.month, self.date.day)
-
 
 class Contact(ReminderModel):
     name = peewee.CharField()
@@ -87,9 +84,9 @@ def last_posting_day(target):
 def format_message(target):
     return "Wilsons!!\n\n{} has a birthday on {}, this is in {} days.\nThe last posting day is {}.\nThey will be {}.".format(
         target.name,
-        target.date_this_year().strftime(format),
+        target.date.strftime(format),
         days_until(target.date),
-        last_posting_day(target.date_this_year()).strftime(format),
+        last_posting_day(target.date).strftime(format),
         age(target.date)
         )
 
@@ -131,11 +128,11 @@ for occasion in Anniversary.select():
         message = send_message(occasion)
         contacts = [contact.email for contact in Contact.select()]
 
-        server.sendmail(secrets.FROM_ADDR, ",".join(contacts), message.as_string())
+        #server.sendmail(secrets.FROM_ADDR, ",".join(contacts), message.as_string())
         
         logger.info("Sending email:\n{}".format(message.as_string()))
 
-        response = send_SMS(occasion)
+        #response = send_SMS(occasion)
     else:
         logger.debug("Not sending reminder for {}".format(occasion.name))
 
