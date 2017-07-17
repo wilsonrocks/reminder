@@ -27,9 +27,20 @@ class ReminderModel(peewee.Model):
     class Meta:
         database = db
 
+class Address(ReminderModel):
+    line1 = peewee.CharField(null = True)
+    line2 = peewee.CharField(null = True)
+    line3 = peewee.CharField(null = True)
+    line4 = peewee.CharField(null = True)
+
+    def postal(self):
+        non_blank = [k for k in [line1,line2,line3,line4] if k]
+        return "\n".join(non_blank)
+
 class Anniversary(ReminderModel):
     name = peewee.CharField()
     date = peewee.DateField()
+    address = peewee.ForeignKeyField(Address, related_name = 'residents', null = True)
 
     def date_this_year(self):
         return datetime.date(datetime.date.today().year, self.date.month, self.date.day)
@@ -42,6 +53,8 @@ class Contact(ReminderModel):
 
 class Bank_Holiday(ReminderModel):
     date = peewee.DateField()
+
+
 
 def age(target):
     return (next_anniversary(target).year - target.year)
@@ -119,7 +132,7 @@ def send_SMS(occasion):
 
 
 
-db.create_tables([Anniversary,Contact,Bank_Holiday],safe=True)
+db.create_tables([Anniversary, Contact, Bank_Holiday, Address], safe=True)
 
 
 server = smtplib.SMTP_SSL('smtp.gmail.com',465)
@@ -131,11 +144,11 @@ for occasion in Anniversary.select():
         message = send_message(occasion)
         contacts = [contact.email for contact in Contact.select()]
 
-        server.sendmail(secrets.FROM_ADDR, ",".join(contacts), message.as_string())
+    #    server.sendmail(secrets.FROM_ADDR, ",".join(contacts), message.as_string())
         
         logger.info("Sending email:\n{}".format(message.as_string()))
 
-        response = send_SMS(occasion)
+     #   response = send_SMS(occasion)
     else:
         logger.debug("Not sending reminder for {}".format(occasion.name))
 
