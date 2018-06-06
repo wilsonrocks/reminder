@@ -1,7 +1,8 @@
 import logging
+import sys
 logging.basicConfig(filename='/home/dad/reminder/reminder.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(name)s %(message)s')
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.StreamHandler())
+logger.addHandler(logging.StreamHandler(stream=sys.stdout))
 
 
 import datetime
@@ -40,7 +41,7 @@ class Address(ReminderModel):
 class Anniversary(ReminderModel):
     name = peewee.CharField()
     date = peewee.DateField()
-    address = peewee.ForeignKeyField(Address, related_name = 'residents', null = True)
+#    address = peewee.ForeignKeyField(Address, related_name = 'residents', null = True)
 
     def date_this_year(self):
         return datetime.date(datetime.date.today().year, self.date.month, self.date.day)
@@ -144,11 +145,11 @@ for occasion in Anniversary.select():
         message = send_message(occasion)
         contacts = [contact.email for contact in Contact.select()]
 
-    #    server.sendmail(secrets.FROM_ADDR, ",".join(contacts), message.as_string())
+        server.sendmail(secrets.FROM_ADDR, ",".join(contacts), message.as_string())
         
         logger.info("Sending email:\n{}".format(message.as_string()))
 
-     #   response = send_SMS(occasion)
+        response = send_SMS(occasion)
     else:
         logger.debug("Not sending reminder for {}".format(occasion.name))
 
