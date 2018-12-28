@@ -136,19 +136,19 @@ def send_SMS(occasion):
 db.create_tables([Anniversary, Contact, Bank_Holiday, Address], safe=True)
 
 
-server = smtplib.SMTP_SSL('smtp.gmail.com',465)
-server.login(secrets.FROM_ADDR,secrets.PASSWORD)
+#server = smtplib.SMTP_SSL('smtp.gmail.com',465)
+#server.login(secrets.FROM_ADDR,secrets.PASSWORD)
 
 for occasion in Anniversary.select():
     if days_until(occasion.date) in days_to_send:
         logger.info("Sending reminder for {}".format(occasion.name))
-        message = send_message(occasion)
-        contacts = [contact.email for contact in Contact.select()]
+        #message = send_message(occasion)
+        #contacts = [contact.email for contact in Contact.select()]
 
-        server.sendmail(secrets.FROM_ADDR, ",".join(contacts), message.as_string())
+        #server.sendmail(secrets.FROM_ADDR, ",".join(contacts), message.as_string())
         
-        logger.info("Sending email:\n{}".format(message.as_string()))
-
+        logger.info("not Sending email:\n{}".format(message.as_string()))
+        logger.info("texting {}".format(occasion.phone))
         response = send_SMS(occasion)
     else:
         logger.debug("Not sending reminder for {}".format(occasion.name))
